@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: reglo
+      POSTGRES_PASSWORD: reglo
+      POSTGRES_DB: reglo
+    ports:
+      - '5433:5432'
+    volumes:
+      - reglo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U reglo']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      DATABASE_URL: postgres://reglo:reglo@postgres:5432/reglo
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_EXPIRES_IN: 7d
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_xxx}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_xxx}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3010}
+    ports:
+      - '3011:3011'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:3011/api}
+    ports:
+      - '3010:3010'
+    depends_on:
+      - backend
+
+volumes:
+  reglo_pgdata:

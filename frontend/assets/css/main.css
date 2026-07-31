@@ -1,0 +1,30 @@
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@600,500,700,400&f[]=spline-sans-mono@500,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-paper text-ink font-body antialiased;
+}
+
+::selection {
+  @apply bg-indigo/15 text-ink;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.focus-ring:focus-visible {
+  outline: 3px solid #2A3B8F;
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
