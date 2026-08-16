@@ -14,7 +14,7 @@ const mobileOpen = ref(false)
       <nav v-if="auth.user" class="hidden items-center gap-7 font-body text-sm text-muted md:flex">
         <NuxtLink to="/dashboard" class="transition hover:text-ink">Tableau de bord</NuxtLink>
         <NuxtLink to="/clients" class="transition hover:text-ink">Clients</NuxtLink>
-        <NuxtLink to="/settings" class="transition hover:text-ink">Reglages</NuxtLink>
+        <NuxtLink to="/settings" class="transition hover:text-ink">Réglages</NuxtLink>
       </nav>
 
       <div class="hidden items-center gap-3 md:flex">
@@ -49,7 +49,7 @@ const mobileOpen = ref(false)
         <template v-if="auth.user">
           <NuxtLink to="/dashboard" @click="mobileOpen = false">Tableau de bord</NuxtLink>
           <NuxtLink to="/clients" @click="mobileOpen = false">Clients</NuxtLink>
-          <NuxtLink to="/settings" @click="mobileOpen = false">Reglages</NuxtLink>
+          <NuxtLink to="/settings" @click="mobileOpen = false">Réglages</NuxtLink>
         </template>
         <template v-else>
           <NuxtLink to="/login" @click="mobileOpen = false">Connexion</NuxtLink>

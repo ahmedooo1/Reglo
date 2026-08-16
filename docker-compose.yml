@@ -6,10 +6,10 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: reglo
-      POSTGRES_PASSWORD: reglo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reglo}
       POSTGRES_DB: reglo
     ports:
-      - '5433:5432'
+      - '127.0.0.1:${POSTGRES_HOST_PORT:-5433}:5432'
     volumes:
       - reglo_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -24,14 +24,14 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3011
-      DATABASE_URL: postgres://reglo:reglo@postgres:5432/reglo
+      DATABASE_URL: postgres://reglo:${POSTGRES_PASSWORD:-reglo}@postgres:5432/reglo
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
       JWT_EXPIRES_IN: 7d
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_xxx}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_xxx}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3010}
     ports:
-      - '3011:3011'
+      - '127.0.0.1:${BACKEND_HOST_PORT:-3011}:3011'
     depends_on:
       postgres:
         condition: service_healthy
@@ -42,7 +42,7 @@ services:
     environment:
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:3011/api}
     ports:
-      - '3010:3010'
+      - '127.0.0.1:${FRONTEND_HOST_PORT:-3010}:3010'
     depends_on:
       - backend
 
