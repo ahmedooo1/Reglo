@@ -18,6 +18,7 @@ const invoice = ref<PublicInvoice | null>(null)
 const loading = ref(true)
 const notFound = ref(false)
 const payingLoading = ref(false)
+const confirmingPayment = ref(false)
 
 function totals(items: InvoiceItem[]) {
   let subtotal = 0
@@ -36,6 +37,19 @@ function euros(cents: number) {
 onMounted(async () => {
   try {
     invoice.value = await request<PublicInvoice>(`/invoices/public/${route.params.token}`)
+
+    const sessionId = route.query.session_id as string | undefined
+    if (route.query.paiement === 'succes' && sessionId) {
+      confirmingPayment.value = true
+      try {
+        const result = await request<{ paid: boolean }>(`/payments/confirm/${sessionId}`)
+        if (result.paid) {
+          invoice.value = await request<PublicInvoice>(`/invoices/public/${route.params.token}`)
+        }
+      } finally {
+        confirmingPayment.value = false
+      }
+    }
   } catch (e) {
     notFound.value = true
   } finally {
@@ -91,18 +105,20 @@ function downloadPdf() {
 
       <p v-if="invoice.notes" class="mt-4 font-body text-sm text-muted">{{ invoice.notes }}</p>
 
+      <p v-if="confirmingPayment" class="mt-4 font-body text-sm text-muted">Confirmation du paiement...</p>
+
       <div class="mt-8 flex flex-wrap gap-3">
         <button
-          v-if="invoice.status !== 'payee'"
+          v-if="invoice.status !== 'payee' && !confirmingPayment"
           :disabled="payingLoading"
           class="rounded-lg bg-indigo px-5 py-2.5 font-body text-sm font-semibold text-white disabled:opacity-60"
           @click="payNow"
         >
           {{ payingLoading ? 'Redirection...' : 'Payer en ligne' }}
         </button>
-        <p v-else class="font-body text-sm font-medium text-emerald">Facture deja payee, merci !</p>
+        <p v-else class="font-body text-sm font-medium text-emerald">Facture déjà payée, merci !</p>
         <button class="rounded-lg border border-line px-5 py-2.5 font-body text-sm font-medium text-ink" @click="downloadPdf">
-          Telecharger le PDF
+          Télécharger le PDF
         </button>
       </div>
     </div>

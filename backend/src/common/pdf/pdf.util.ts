@@ -1,4 +1,4 @@
-import PDFDocument from 'pdfkit';
+import * as PDFDocument from 'pdfkit';
 import { PassThrough } from 'stream';
 import { LineItem, computeTotals } from '../billing/billing.util';
 
@@ -77,7 +77,7 @@ export function generateDocumentPdf(data: DocumentPdfData): Promise<Buffer> {
       .text(`Date: ${data.date.toLocaleDateString('fr-FR')}`, 350, 92, { width: 200, align: 'right' });
 
     if (data.dueOrValidDate) {
-      const label = data.type === 'devis' ? 'Valable jusqu au' : 'Echeance';
+      const label = data.type === 'devis' ? "Valable jusqu'au" : 'Échéance';
       doc.text(`${label}: ${data.dueOrValidDate.toLocaleDateString('fr-FR')}`, 350, 106, {
         width: 200,
         align: 'right',
@@ -170,16 +170,16 @@ export function generateDocumentPdf(data: DocumentPdfData): Promise<Buffer> {
     doc.font('Helvetica').fontSize(7.5).fillColor(gray);
     if (data.type === 'facture') {
       doc.text(
-        "En cas de retard de paiement, une penalite egale a 3 fois le taux d'interet legal sera appliquee, ainsi qu'une indemnite forfaitaire de recouvrement de 40 €.",
+        "En cas de retard de paiement, une pénalité égale à 3 fois le taux d'intérêt légal sera appliquée, ainsi qu'une indemnité forfaitaire de recouvrement de 40 €.",
         50,
         footerY,
         { width: 500 },
       );
       if (data.company.iban) {
-        doc.text(`IBAN pour reglement: ${data.company.iban}`, 50, doc.y + 4, { width: 500 });
+        doc.text(`IBAN pour règlement : ${data.company.iban}`, 50, doc.y + 4, { width: 500 });
       }
     } else {
-      doc.text('Devis valable sous reserve d acceptation ecrite du client dans le delai indique ci-dessus.', 50, footerY, {
+      doc.text("Devis valable sous réserve d'acceptation écrite du client dans le délai indiqué ci-dessus.", 50, footerY, {
         width: 500,
       });
     }

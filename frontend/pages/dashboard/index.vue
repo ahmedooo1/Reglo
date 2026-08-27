@@ -107,57 +107,61 @@ onMounted(async () => {
     <div v-if="loading" class="font-body text-muted">Chargement...</div>
 
     <div v-else-if="tab === 'invoices'" class="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
-      <table class="w-full text-left font-body text-sm">
-        <thead class="border-b border-line bg-paper/60 text-xs uppercase tracking-wide text-muted">
-          <tr>
-            <th class="px-5 py-3">N&deg;</th>
-            <th class="px-5 py-3">Client</th>
-            <th class="px-5 py-3 text-right">Total TTC</th>
-            <th class="px-5 py-3">Statut</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="!invoices.length"><td colspan="4" class="px-5 py-8 text-center text-muted">Aucune facture pour l'instant.</td></tr>
-          <tr
-            v-for="inv in invoices"
-            :key="inv.id"
-            class="cursor-pointer border-b border-line last:border-0 hover:bg-paper/60"
-            @click="router.push(`/invoices/${inv.id}`)"
-          >
-            <td class="px-5 py-3 font-mono">{{ inv.number }}</td>
-            <td class="px-5 py-3">{{ inv.client.name }}</td>
-            <td class="px-5 py-3 text-right font-mono tabular">{{ euros(totalTTC(inv.items)) }} &euro;</td>
-            <td class="px-5 py-3"><StatusPill :status="inv.status" :overdue="inv.isOverdue" /></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[560px] text-left font-body text-sm">
+          <thead class="border-b border-line bg-paper/60 text-xs uppercase tracking-wide text-muted">
+            <tr>
+              <th class="whitespace-nowrap px-5 py-3">N&deg;</th>
+              <th class="whitespace-nowrap px-5 py-3">Client</th>
+              <th class="whitespace-nowrap px-5 py-3 text-right">Total TTC</th>
+              <th class="whitespace-nowrap px-5 py-3">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!invoices.length"><td colspan="4" class="px-5 py-8 text-center text-muted">Aucune facture pour l'instant.</td></tr>
+            <tr
+              v-for="inv in invoices"
+              :key="inv.id"
+              class="cursor-pointer border-b border-line last:border-0 hover:bg-paper/60"
+              @click="router.push(`/invoices/${inv.id}`)"
+            >
+              <td class="whitespace-nowrap px-5 py-3 font-mono">{{ inv.number }}</td>
+              <td class="whitespace-nowrap px-5 py-3">{{ inv.client.name }}</td>
+              <td class="whitespace-nowrap px-5 py-3 text-right font-mono tabular">{{ euros(totalTTC(inv.items)) }} &euro;</td>
+              <td class="whitespace-nowrap px-5 py-3"><StatusPill :status="inv.status" :overdue="inv.isOverdue" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div v-else class="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
-      <table class="w-full text-left font-body text-sm">
-        <thead class="border-b border-line bg-paper/60 text-xs uppercase tracking-wide text-muted">
-          <tr>
-            <th class="px-5 py-3">N&deg;</th>
-            <th class="px-5 py-3">Client</th>
-            <th class="px-5 py-3 text-right">Total TTC</th>
-            <th class="px-5 py-3">Statut</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="!quotes.length"><td colspan="4" class="px-5 py-8 text-center text-muted">Aucun devis pour l'instant.</td></tr>
-          <tr
-            v-for="q in quotes"
-            :key="q.id"
-            class="cursor-pointer border-b border-line last:border-0 hover:bg-paper/60"
-            @click="router.push(`/quotes/${q.id}`)"
-          >
-            <td class="px-5 py-3 font-mono">{{ q.number }}</td>
-            <td class="px-5 py-3">{{ q.client.name }}</td>
-            <td class="px-5 py-3 text-right font-mono tabular">{{ euros(totalTTC(q.items)) }} &euro;</td>
-            <td class="px-5 py-3"><StatusPill :status="q.status" /></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[560px] text-left font-body text-sm">
+          <thead class="border-b border-line bg-paper/60 text-xs uppercase tracking-wide text-muted">
+            <tr>
+              <th class="whitespace-nowrap px-5 py-3">N&deg;</th>
+              <th class="whitespace-nowrap px-5 py-3">Client</th>
+              <th class="whitespace-nowrap px-5 py-3 text-right">Total TTC</th>
+              <th class="whitespace-nowrap px-5 py-3">Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!quotes.length"><td colspan="4" class="px-5 py-8 text-center text-muted">Aucun devis pour l'instant.</td></tr>
+            <tr
+              v-for="q in quotes"
+              :key="q.id"
+              class="cursor-pointer border-b border-line last:border-0 hover:bg-paper/60"
+              @click="router.push(`/quotes/${q.id}`)"
+            >
+              <td class="whitespace-nowrap px-5 py-3 font-mono">{{ q.number }}</td>
+              <td class="whitespace-nowrap px-5 py-3">{{ q.client.name }}</td>
+              <td class="whitespace-nowrap px-5 py-3 text-right font-mono tabular">{{ euros(totalTTC(q.items)) }} &euro;</td>
+              <td class="whitespace-nowrap px-5 py-3"><StatusPill :status="q.status" /></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </main>
 </template>

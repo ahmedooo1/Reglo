@@ -77,7 +77,7 @@ async function remove(id: string) {
         <input v-model="form.email" type="email" class="focus-ring w-full rounded-lg border border-line px-3 py-2.5 text-ink" />
       </div>
       <div>
-        <label class="mb-1.5 block font-body text-sm text-ink/80">Telephone</label>
+        <label class="mb-1.5 block font-body text-sm text-ink/80">Téléphone</label>
         <input v-model="form.phone" class="focus-ring w-full rounded-lg border border-line px-3 py-2.5 text-ink" />
       </div>
       <div class="sm:col-span-2">
@@ -97,7 +97,7 @@ async function remove(id: string) {
     <div v-if="loading" class="font-body text-muted">Chargement...</div>
 
     <div v-else-if="!clients.length" class="rounded-2xl border border-line bg-white p-10 text-center shadow-card">
-      <p class="font-body text-muted">Aucun client enregistre pour l'instant.</p>
+      <p class="font-body text-muted">Aucun client enregistré pour l'instant.</p>
     </div>
 
     <div v-else class="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white shadow-card">

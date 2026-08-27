@@ -93,40 +93,42 @@ async function downloadPdf() {
 
       <div class="mb-6 flex flex-wrap gap-3">
         <button v-if="invoice.status === 'brouillon'" class="rounded-lg bg-indigo px-4 py-2 font-body text-sm font-semibold text-white" @click="setStatus('envoyee')">
-          Marquer comme envoyee
+          Marquer comme envoyée
         </button>
         <button v-if="invoice.status !== 'payee'" class="rounded-lg bg-emerald px-4 py-2 font-body text-sm font-semibold text-white" @click="setStatus('payee')">
-          Marquer comme payee
+          Marquer comme payée
         </button>
         <button class="rounded-lg border border-line px-4 py-2 font-body text-sm font-medium text-ink" @click="downloadPdf">
-          Telecharger le PDF
+          Télécharger le PDF
         </button>
         <button class="rounded-lg border border-line px-4 py-2 font-body text-sm font-medium text-ink" @click="copyPublicLink">
-          {{ linkCopied ? 'Lien copie !' : 'Copier le lien de paiement' }}
+          {{ linkCopied ? 'Lien copié !' : 'Copier le lien de paiement' }}
         </button>
       </div>
 
       <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
-        <table class="w-full text-left font-body text-sm">
-          <thead class="border-b border-line bg-paper/60 text-xs uppercase tracking-wide text-muted">
-            <tr>
-              <th class="px-5 py-3">Description</th>
-              <th class="px-5 py-3 text-right">Qte</th>
-              <th class="px-5 py-3 text-right">PU HT</th>
-              <th class="px-5 py-3 text-right">TVA</th>
-              <th class="px-5 py-3 text-right">Total HT</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, i) in invoice.items" :key="i" class="border-b border-line last:border-0">
-              <td class="px-5 py-3">{{ item.description }}</td>
-              <td class="px-5 py-3 text-right font-mono">{{ item.quantity }}</td>
-              <td class="px-5 py-3 text-right font-mono">{{ euros(item.unitPriceCents) }} &euro;</td>
-              <td class="px-5 py-3 text-right font-mono">{{ item.vatRate }}%</td>
-              <td class="px-5 py-3 text-right font-mono tabular">{{ euros(item.quantity * item.unitPriceCents) }} &euro;</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[520px] text-left font-body text-sm">
+            <thead class="border-b border-line bg-paper/60 text-xs uppercase tracking-wide text-muted">
+              <tr>
+                <th class="whitespace-nowrap px-5 py-3">Description</th>
+                <th class="whitespace-nowrap px-5 py-3 text-right">Qte</th>
+                <th class="whitespace-nowrap px-5 py-3 text-right">PU HT</th>
+                <th class="whitespace-nowrap px-5 py-3 text-right">TVA</th>
+                <th class="whitespace-nowrap px-5 py-3 text-right">Total HT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, i) in invoice.items" :key="i" class="border-b border-line last:border-0">
+                <td class="px-5 py-3">{{ item.description }}</td>
+                <td class="whitespace-nowrap px-5 py-3 text-right font-mono">{{ item.quantity }}</td>
+                <td class="whitespace-nowrap px-5 py-3 text-right font-mono">{{ euros(item.unitPriceCents) }} &euro;</td>
+                <td class="whitespace-nowrap px-5 py-3 text-right font-mono">{{ item.vatRate }}%</td>
+                <td class="whitespace-nowrap px-5 py-3 text-right font-mono tabular">{{ euros(item.quantity * item.unitPriceCents) }} &euro;</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div class="flex justify-end p-5">
           <div class="w-full max-w-xs space-y-1.5 font-body text-sm">
             <div class="flex justify-between text-muted"><span>Sous-total HT</span><span class="font-mono tabular">{{ euros(totals(invoice.items).subtotal) }} &euro;</span></div>

@@ -22,6 +22,11 @@ export class UsersService {
     return this.usersRepo.save(user);
   }
 
+  async setEmailVerified(id: string) {
+    await this.usersRepo.update(id, { emailVerified: true });
+    return this.findById(id);
+  }
+
   async updateProfile(id: string, data: Partial<User>) {
     await this.usersRepo.update(id, data);
     return this.findById(id);

@@ -45,7 +45,7 @@ async function submit() {
     })
     router.push(`/invoices/${invoice.id}`)
   } catch (e) {
-    errorMsg.value = "La creation de la facture a echoue."
+    errorMsg.value = "La création de la facture a échoué."
   } finally {
     saving.value = false
   }
@@ -74,7 +74,7 @@ async function submit() {
             </select>
           </div>
           <div>
-            <label class="mb-1.5 block font-body text-sm text-ink/80">Echeance</label>
+            <label class="mb-1.5 block font-body text-sm text-ink/80">Échéance</label>
             <input v-model="dueDate" type="date" class="focus-ring w-full rounded-lg border border-line px-3 py-2.5 text-ink" />
           </div>
         </div>
@@ -92,7 +92,7 @@ async function submit() {
       <p v-if="errorMsg" class="font-body text-sm text-rose">{{ errorMsg }}</p>
 
       <button type="submit" :disabled="saving" class="focus-ring rounded-lg bg-indigo px-6 py-3.5 font-display font-semibold text-white disabled:opacity-60">
-        {{ saving ? 'Creation...' : 'Creer la facture' }}
+        {{ saving ? 'Création...' : 'Créer la facture' }}
       </button>
     </form>
   </main>

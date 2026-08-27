@@ -99,10 +99,10 @@ function downloadPdf() {
             Refuser
           </button>
         </template>
-        <p v-else-if="quote.status === 'accepte'" class="font-body text-sm font-medium text-emerald">Devis accepte, merci !</p>
-        <p v-else-if="quote.status === 'refuse'" class="font-body text-sm font-medium text-muted">Devis refuse.</p>
+        <p v-else-if="quote.status === 'accepte'" class="font-body text-sm font-medium text-emerald">Devis accepté, merci !</p>
+        <p v-else-if="quote.status === 'refuse'" class="font-body text-sm font-medium text-muted">Devis refusé.</p>
         <button class="rounded-lg border border-line px-5 py-2.5 font-body text-sm font-medium text-ink" @click="downloadPdf">
-          Telecharger le PDF
+          Télécharger le PDF
         </button>
       </div>
     </div>

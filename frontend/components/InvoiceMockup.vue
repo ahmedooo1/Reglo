@@ -44,7 +44,7 @@ function euros(cents: number) {
         <p class="font-display text-sm font-bold text-ink">FACTURE</p>
         <p class="font-mono text-xs text-muted">FAC-2026-0042</p>
       </div>
-      <span class="rounded-full bg-amber-light px-2.5 py-1 font-body text-xs font-semibold text-amber">Envoyee</span>
+      <span class="rounded-full bg-amber-light px-2.5 py-1 font-body text-xs font-semibold text-amber">Envoyée</span>
     </div>
 
     <div class="space-y-2.5">

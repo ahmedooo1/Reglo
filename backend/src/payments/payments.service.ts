@@ -34,11 +34,21 @@ export class PaymentsService {
         },
       ],
       metadata: { invoiceId: invoice.id },
-      success_url: `${frontendUrl}/f/${token}?paiement=succes`,
+      success_url: `${frontendUrl}/f/${token}?paiement=succes&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${frontendUrl}/f/${token}?paiement=annule`,
     });
 
     return { url: session.url };
+  }
+
+  async confirmSession(sessionId: string) {
+    const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+    const invoiceId = session.metadata?.invoiceId;
+    if (session.payment_status === 'paid' && invoiceId) {
+      await this.invoicesService.markPaid(invoiceId);
+      return { paid: true };
+    }
+    return { paid: false };
   }
 
   constructEvent(payload: Buffer, signature: string) {

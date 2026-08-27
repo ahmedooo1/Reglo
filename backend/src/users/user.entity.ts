@@ -19,6 +19,9 @@ export class User {
   @Column({ nullable: true })
   name: string;
 
+  @Column({ default: false })
+  emailVerified: boolean;
+
   // Profil entreprise (pour l'entete des devis/factures)
   @Column({ nullable: true })
   companyName: string;

@@ -83,7 +83,7 @@ async function submit() {
           <input v-model="form.iban" class="focus-ring w-full rounded-lg border border-line px-3 py-2.5 font-mono text-sm text-ink" />
         </div>
         <div>
-          <label class="mb-1.5 block font-body text-sm text-ink/80">Delai de paiement par defaut (jours)</label>
+          <label class="mb-1.5 block font-body text-sm text-ink/80">Délai de paiement par défaut (jours)</label>
           <input v-model.number="form.defaultPaymentTermsDays" type="number" class="focus-ring w-full rounded-lg border border-line px-3 py-2.5 text-ink" />
         </div>
       </div>
@@ -92,7 +92,7 @@ async function submit() {
         <button type="submit" :disabled="saving" class="focus-ring rounded-lg bg-indigo px-6 py-3 font-body text-sm font-semibold text-white disabled:opacity-60">
           {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
         </button>
-        <span v-if="saved" class="font-body text-sm text-emerald">Enregistre &#10003;</span>
+        <span v-if="saved" class="font-body text-sm text-emerald">Enregistré &#10003;</span>
       </div>
     </form>
   </main>
