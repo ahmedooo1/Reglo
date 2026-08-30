@@ -11,7 +11,15 @@ export class UsersService {
   ) {}
 
   findByEmail(email: string) {
-    return this.usersRepo.findOne({ where: { email } });
+    // Emails are effectively case-insensitive everywhere that matters
+    // (Gmail, etc.) but Postgres '=' is case-sensitive by default. Without
+    // this, a user typing "Name@x.com" instead of "name@x.com" silently
+    // fails to match on login/register-duplicate-check/forgot-password --
+    // and forgot-password in particular always returns success either way
+    // (by design, to avoid leaking which emails are registered), so a case
+    // mismatch there looks exactly like "email never arrived" with zero
+    // error anywhere.
+    return this.usersRepo.findOne({ where: { email: email.trim().toLowerCase() } });
   }
 
   findById(id: string) {
@@ -19,7 +27,7 @@ export class UsersService {
   }
 
   async create(data: { email: string; passwordHash: string; name?: string }) {
-    const user = this.usersRepo.create(data);
+    const user = this.usersRepo.create({ ...data, email: data.email.trim().toLowerCase() });
     return this.usersRepo.save(user);
   }
 
