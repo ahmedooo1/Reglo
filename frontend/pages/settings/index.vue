@@ -47,6 +47,34 @@ async function submit() {
     saving.value = false
   }
 }
+
+const pwForm = reactive({ currentPassword: '', newPassword: '', confirmPassword: '' })
+const pwSaving = ref(false)
+const pwSaved = ref(false)
+const pwError = ref('')
+
+async function submitPassword() {
+  pwError.value = ''
+  pwSaved.value = false
+  if (pwForm.newPassword !== pwForm.confirmPassword) {
+    pwError.value = 'Les deux mots de passe ne correspondent pas.'
+    return
+  }
+  pwSaving.value = true
+  try {
+    await request('/users/me/password', {
+      method: 'POST',
+      auth: true,
+      body: { currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword },
+    })
+    pwSaved.value = true
+    Object.assign(pwForm, { currentPassword: '', newPassword: '', confirmPassword: '' })
+  } catch (e: any) {
+    pwError.value = e?.data?.message || 'Impossible de changer le mot de passe.'
+  } finally {
+    pwSaving.value = false
+  }
+}
 </script>
 
 <template>
@@ -93,6 +121,31 @@ async function submit() {
           {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
         </button>
         <span v-if="saved" class="font-body text-sm text-emerald">Enregistré &#10003;</span>
+      </div>
+    </form>
+
+    <h2 v-if="!loading" class="mt-10 font-display text-xl font-bold text-ink">Mot de passe</h2>
+    <form v-if="!loading" class="mt-4 space-y-5 rounded-2xl border border-line bg-white p-6 shadow-card" @submit.prevent="submitPassword">
+      <div>
+        <label class="mb-1.5 block font-body text-sm text-ink/80">Mot de passe actuel</label>
+        <input v-model="pwForm.currentPassword" type="password" required class="focus-ring w-full rounded-lg border border-line px-3 py-2.5 text-ink" />
+      </div>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label class="mb-1.5 block font-body text-sm text-ink/80">Nouveau mot de passe</label>
+          <input v-model="pwForm.newPassword" type="password" required minlength="8" class="focus-ring w-full rounded-lg border border-line px-3 py-2.5 text-ink" />
+        </div>
+        <div>
+          <label class="mb-1.5 block font-body text-sm text-ink/80">Confirme le nouveau mot de passe</label>
+          <input v-model="pwForm.confirmPassword" type="password" required minlength="8" class="focus-ring w-full rounded-lg border border-line px-3 py-2.5 text-ink" />
+        </div>
+      </div>
+      <p v-if="pwError" class="font-body text-sm text-rose">{{ pwError }}</p>
+      <div class="flex items-center gap-4">
+        <button type="submit" :disabled="pwSaving" class="focus-ring rounded-lg bg-indigo px-6 py-3 font-body text-sm font-semibold text-white disabled:opacity-60">
+          {{ pwSaving ? 'Enregistrement...' : 'Changer le mot de passe' }}
+        </button>
+        <span v-if="pwSaved" class="font-body text-sm text-emerald">Mot de passe changé &#10003;</span>
       </div>
     </form>
   </main>

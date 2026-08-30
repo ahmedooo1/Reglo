@@ -4,11 +4,16 @@ const { request } = useApi()
 const name = ref('')
 const email = ref('')
 const password = ref('')
+const acceptedTerms = ref(false)
 const errorMsg = ref('')
 const loading = ref(false)
 const registeredEmail = ref('')
 
 async function submit() {
+  if (!acceptedTerms.value) {
+    errorMsg.value = "Merci d'accepter les CGU pour créer un compte."
+    return
+  }
   loading.value = true
   errorMsg.value = ''
   try {
@@ -62,6 +67,15 @@ async function submit() {
           <label class="mb-1.5 block font-body text-sm text-ink/80">Mot de passe</label>
           <input v-model="password" type="password" required minlength="8" class="focus-ring w-full rounded-lg border border-line bg-white px-4 py-3 text-ink" />
         </div>
+        <label class="flex items-start gap-2.5 font-body text-sm text-ink/80">
+          <input v-model="acceptedTerms" type="checkbox" class="focus-ring mt-0.5 h-4 w-4 rounded border-line" />
+          <span>
+            J'accepte les
+            <NuxtLink to="/legal/cgu" target="_blank" class="text-indigo underline">CGU</NuxtLink>
+            et la
+            <NuxtLink to="/legal/confidentialite" target="_blank" class="text-indigo underline">politique de confidentialité</NuxtLink>
+          </span>
+        </label>
         <p v-if="errorMsg" class="font-body text-sm text-rose">{{ errorMsg }}</p>
         <button type="submit" :disabled="loading" class="focus-ring w-full rounded-lg bg-indigo px-6 py-3.5 font-display font-semibold text-white disabled:opacity-60">
           {{ loading ? 'Création...' : 'Créer mon compte' }}

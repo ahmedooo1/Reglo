@@ -1,6 +1,7 @@
-import { Body, Controller, Get, NotFoundException, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -32,5 +33,11 @@ export class UsersController {
     if (!updated) throw new NotFoundException('Utilisateur introuvable');
     const { passwordHash, ...safe } = updated;
     return safe;
+  }
+
+  @Post('me/password')
+  async changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
+    await this.usersService.changePassword(req.user.id, dto.currentPassword, dto.newPassword);
+    return { success: true };
   }
 }

@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 
 @Injectable()
@@ -30,6 +31,15 @@ export class UsersService {
   async setPassword(id: string, passwordHash: string) {
     await this.usersRepo.update(id, { passwordHash });
     return this.findById(id);
+  }
+
+  async changePassword(id: string, currentPassword: string, newPassword: string) {
+    const user = await this.findById(id);
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) throw new BadRequestException('Mot de passe actuel incorrect');
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    return this.setPassword(id, passwordHash);
   }
 
   async updateProfile(id: string, data: Partial<User>) {
