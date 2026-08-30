@@ -81,4 +81,35 @@ export class AuthService {
     }
     return { success: true };
   }
+
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (user) {
+      const token = this.jwtService.sign(
+        { sub: user.id, purpose: 'reset_password' },
+        { expiresIn: '1h' },
+      );
+      const base = process.env.FRONTEND_URL || 'http://localhost:3010';
+      const resetUrl = `${base}/reset-password/${token}`;
+      await this.mailService.sendPasswordResetEmail({ to: user.email, resetUrl });
+    }
+    // Always return success, whether or not the email exists, so this
+    // endpoint can't be used to check which emails have an account.
+    return { success: true };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    let payload: { sub: string; purpose: string };
+    try {
+      payload = this.jwtService.verify(token);
+    } catch {
+      throw new UnauthorizedException('Lien invalide ou expiré');
+    }
+    if (payload.purpose !== 'reset_password') {
+      throw new UnauthorizedException('Lien invalide ou expiré');
+    }
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.usersService.setPassword(payload.sub, passwordHash);
+    return { success: true };
+  }
 }

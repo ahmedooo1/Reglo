@@ -27,6 +27,11 @@ export class UsersService {
     return this.findById(id);
   }
 
+  async setPassword(id: string, passwordHash: string) {
+    await this.usersRepo.update(id, { passwordHash });
+    return this.findById(id);
+  }
+
   async updateProfile(id: string, data: Partial<User>) {
     await this.usersRepo.update(id, data);
     return this.findById(id);

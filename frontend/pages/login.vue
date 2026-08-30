@@ -55,7 +55,10 @@ async function resendVerification() {
         <input v-model="email" type="email" required class="focus-ring w-full rounded-lg border border-line bg-white px-4 py-3 text-ink" />
       </div>
       <div>
-        <label class="mb-1.5 block font-body text-sm text-ink/80">Mot de passe</label>
+        <div class="mb-1.5 flex items-center justify-between">
+          <label class="block font-body text-sm text-ink/80">Mot de passe</label>
+          <NuxtLink to="/forgot-password" class="font-body text-xs text-indigo underline">Mot de passe oublié ?</NuxtLink>
+        </div>
         <input v-model="password" type="password" required class="focus-ring w-full rounded-lg border border-line bg-white px-4 py-3 text-ink" />
       </div>
       <p v-if="errorMsg" class="font-body text-sm text-rose">{{ errorMsg }}</p>
