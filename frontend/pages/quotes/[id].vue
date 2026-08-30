@@ -22,6 +22,9 @@ const quote = ref<Quote | null>(null)
 const loading = ref(true)
 const converting = ref(false)
 const linkCopied = ref(false)
+const sending = ref(false)
+const sendError = ref('')
+const sent = ref(false)
 
 function totals(items: QuoteItem[]) {
   let subtotal = 0
@@ -78,6 +81,22 @@ async function downloadPdf() {
   window.open(url, '_blank')
 }
 
+async function sendToClient() {
+  if (!quote.value) return
+  sending.value = true
+  sendError.value = ''
+  sent.value = false
+  try {
+    await request(`/quotes/${quote.value.id}/send`, { method: 'POST', auth: true })
+    sent.value = true
+    await load()
+  } catch (e: any) {
+    sendError.value = e?.data?.message || "Impossible d'envoyer l'email."
+  } finally {
+    sending.value = false
+  }
+}
+
 async function convertToInvoice() {
   if (!quote.value) return
   converting.value = true
@@ -131,7 +150,19 @@ async function convertToInvoice() {
         <button class="rounded-lg border border-line px-4 py-2 font-body text-sm font-medium text-ink" @click="copyPublicLink">
           {{ linkCopied ? 'Lien copié !' : 'Copier le lien client' }}
         </button>
+        <button
+          v-if="quote.client.email"
+          :disabled="sending"
+          class="rounded-lg border border-line px-4 py-2 font-body text-sm font-medium text-ink disabled:opacity-60"
+          @click="sendToClient"
+        >
+          {{ sending ? 'Envoi...' : sent ? 'Email envoyé ✓' : 'Envoyer par email' }}
+        </button>
+        <span v-else class="self-center font-body text-xs text-muted">
+          Ajoute un email au client pour pouvoir lui envoyer ce devis directement.
+        </span>
       </div>
+      <p v-if="sendError" class="mb-4 font-body text-sm text-rose">{{ sendError }}</p>
 
       <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
         <div class="overflow-x-auto">

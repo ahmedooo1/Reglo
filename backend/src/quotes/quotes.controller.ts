@@ -45,6 +45,12 @@ export class QuotesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post(':id/send')
+  sendToClient(@Param('id') id: string, @Req() req: any) {
+    return this.quotesService.sendToClient(id, req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id/pdf')
   async pdf(@Param('id') id: string, @Req() req: any, @Res() res: Response) {
     const quote = await this.quotesService.findOneWithOwner(id, req.user.id);

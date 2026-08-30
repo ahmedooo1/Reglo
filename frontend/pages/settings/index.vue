@@ -75,6 +75,25 @@ async function submitPassword() {
     pwSaving.value = false
   }
 }
+
+const showDeleteConfirm = ref(false)
+const deletePassword = ref('')
+const deleting = ref(false)
+const deleteError = ref('')
+
+async function confirmDelete() {
+  deleteError.value = ''
+  deleting.value = true
+  try {
+    await request('/users/me', { method: 'DELETE', auth: true, body: { password: deletePassword.value } })
+    auth.logout()
+    router.push('/')
+  } catch (e: any) {
+    deleteError.value = e?.data?.message || 'Impossible de supprimer le compte.'
+  } finally {
+    deleting.value = false
+  }
+}
 </script>
 
 <template>
@@ -148,5 +167,47 @@ async function submitPassword() {
         <span v-if="pwSaved" class="font-body text-sm text-emerald">Mot de passe changé &#10003;</span>
       </div>
     </form>
+
+    <h2 v-if="!loading" class="mt-10 font-display text-xl font-bold text-rose">Zone dangereuse</h2>
+    <div v-if="!loading" class="mt-4 rounded-2xl border border-rose/30 bg-rose-light/40 p-6">
+      <p class="font-body text-sm text-ink/80">
+        Supprimer ton compte efface définitivement ton profil, tes clients, tes devis et tes
+        factures. Cette action est irréversible.
+      </p>
+
+      <button
+        v-if="!showDeleteConfirm"
+        type="button"
+        class="focus-ring mt-4 rounded-lg border border-rose px-5 py-2.5 font-body text-sm font-semibold text-rose"
+        @click="showDeleteConfirm = true"
+      >
+        Supprimer mon compte
+      </button>
+
+      <div v-else class="mt-4 space-y-4">
+        <div>
+          <label class="mb-1.5 block font-body text-sm text-ink/80">Confirme ton mot de passe pour continuer</label>
+          <input v-model="deletePassword" type="password" class="focus-ring w-full rounded-lg border border-line bg-white px-3 py-2.5 text-ink" />
+        </div>
+        <p v-if="deleteError" class="font-body text-sm text-rose">{{ deleteError }}</p>
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            :disabled="deleting || !deletePassword"
+            class="focus-ring rounded-lg bg-rose px-5 py-2.5 font-body text-sm font-semibold text-white disabled:opacity-60"
+            @click="confirmDelete"
+          >
+            {{ deleting ? 'Suppression...' : 'Confirmer la suppression définitive' }}
+          </button>
+          <button
+            type="button"
+            class="font-body text-sm text-ink/60 underline"
+            @click="showDeleteConfirm = false; deletePassword = ''; deleteError = ''"
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
   </main>
 </template>

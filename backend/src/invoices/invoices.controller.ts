@@ -45,6 +45,12 @@ export class InvoicesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post(':id/send')
+  sendToClient(@Param('id') id: string, @Req() req: any) {
+    return this.invoicesService.sendToClient(id, req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id/pdf')
   async pdf(@Param('id') id: string, @Req() req: any, @Res() res: Response) {
     const invoice = await this.invoicesService.findOneWithOwner(id, req.user.id);

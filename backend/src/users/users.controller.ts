@@ -1,7 +1,8 @@
-import { Body, Controller, Get, NotFoundException, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -39,5 +40,10 @@ export class UsersController {
   async changePassword(@Req() req: any, @Body() dto: ChangePasswordDto) {
     await this.usersService.changePassword(req.user.id, dto.currentPassword, dto.newPassword);
     return { success: true };
+  }
+
+  @Delete('me')
+  async deleteMe(@Req() req: any, @Body() dto: DeleteAccountDto) {
+    return this.usersService.deleteAccount(req.user.id, dto.password);
   }
 }

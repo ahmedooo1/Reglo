@@ -42,6 +42,18 @@ export class UsersService {
     return this.setPassword(id, passwordHash);
   }
 
+  async deleteAccount(id: string, password: string) {
+    const user = await this.findById(id);
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) throw new BadRequestException('Mot de passe incorrect');
+    // Clients/quotes/invoices all cascade-delete via their owner FK
+    // (onDelete: 'CASCADE'), so this alone removes everything tied to
+    // the account -- the RGPD "droit à l'effacement" in one operation.
+    await this.usersRepo.delete(id);
+    return { deleted: true };
+  }
+
   async updateProfile(id: string, data: Partial<User>) {
     await this.usersRepo.update(id, data);
     return this.findById(id);

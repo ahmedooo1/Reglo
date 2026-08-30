@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { nanoid } from 'nanoid';
@@ -6,6 +6,18 @@ import { Invoice, InvoiceStatus } from './invoice.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UsersService } from '../users/users.service';
 import { ClientsService } from '../clients/clients.service';
+import { MailService } from '../mail/mail.service';
+
+function invoiceTotalLabel(items: Invoice['items']) {
+  let subtotal = 0;
+  let vat = 0;
+  for (const i of items) {
+    const lineTotal = i.quantity * i.unitPriceCents;
+    subtotal += lineTotal;
+    vat += Math.round((lineTotal * i.vatRate) / 100);
+  }
+  return ((subtotal + vat) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 @Injectable()
 export class InvoicesService {
@@ -13,6 +25,7 @@ export class InvoicesService {
     @InjectRepository(Invoice) private readonly invoicesRepo: Repository<Invoice>,
     private readonly usersService: UsersService,
     private readonly clientsService: ClientsService,
+    private readonly mailService: MailService,
   ) {}
 
   private withComputed(invoice: Invoice) {
@@ -89,5 +102,25 @@ export class InvoicesService {
   async markPaid(invoiceId: string) {
     await this.invoicesRepo.update(invoiceId, { status: 'payee' });
     return this.invoicesRepo.findOne({ where: { id: invoiceId } });
+  }
+
+  async sendToClient(id: string, ownerId: string) {
+    const invoice = await this.findOneWithOwner(id, ownerId);
+    if (!invoice) throw new NotFoundException('Facture introuvable');
+    if (!invoice.client.email) {
+      throw new BadRequestException("Ce client n'a pas d'adresse email enregistrée");
+    }
+    const base = process.env.FRONTEND_URL || 'http://localhost:3010';
+    await this.mailService.sendInvoiceEmail({
+      to: invoice.client.email,
+      companyName: invoice.owner.companyName || invoice.owner.name,
+      number: invoice.number,
+      totalLabel: invoiceTotalLabel(invoice.items),
+      viewUrl: `${base}/f/${invoice.publicToken}`,
+    });
+    if (invoice.status === 'brouillon') {
+      await this.invoicesRepo.update(id, { status: 'envoyee' });
+    }
+    return this.findOneForOwner(id, ownerId);
   }
 }
