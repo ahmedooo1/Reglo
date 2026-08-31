@@ -29,7 +29,14 @@ export interface DocumentPdfData {
 }
 
 function formatEur(cents: number) {
-  return (cents / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' \u20ac';
+  // toLocaleString('fr-FR') groups thousands with U+202F (narrow no-break
+  // space), which PDFKit's base Helvetica font (WinAnsi encoding) has no
+  // glyph for -- it was rendering as a stray "/" on any amount >= 1000.
+  // Swap it (and the regular no-break space, same issue) for a plain space.
+  const amount = (cents / 100)
+    .toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    .replace(/[\u202f\u00a0]/g, ' ');
+  return `${amount} \u20ac`;
 }
 
 export function generateDocumentPdf(data: DocumentPdfData): Promise<Buffer> {
