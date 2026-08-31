@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const { request } = useApi()
+const auth = useAuthStore()
+const router = useRouter()
 
 const name = ref('')
 const email = ref('')
@@ -8,6 +10,10 @@ const acceptedTerms = ref(false)
 const errorMsg = ref('')
 const loading = ref(false)
 const registeredEmail = ref('')
+
+onMounted(() => {
+  if (auth.user) router.push('/dashboard')
+})
 
 async function submit() {
   if (!acceptedTerms.value) {

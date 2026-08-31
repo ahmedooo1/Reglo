@@ -11,6 +11,10 @@ const loading = ref(false)
 const needsVerification = ref(false)
 const resendState = ref<'idle' | 'sending' | 'sent'>('idle')
 
+onMounted(() => {
+  if (auth.user) router.push('/dashboard')
+})
+
 async function submit() {
   loading.value = true
   errorMsg.value = ''
