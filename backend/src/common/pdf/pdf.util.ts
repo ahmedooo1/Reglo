@@ -23,6 +23,9 @@ export interface DocumentPdfData {
   };
   items: LineItem[];
   notes?: string;
+  // Devis only -- when set, replaces the generic "sous reserve
+  // d'acceptation ecrite" footer with the actual e-signature proof.
+  acceptance?: { name: string; at: Date; ip?: string };
 }
 
 function formatEur(cents: number) {
@@ -43,6 +46,7 @@ export function generateDocumentPdf(data: DocumentPdfData): Promise<Buffer> {
     const ink = '#14171F';
     const indigo = '#2A3B8F';
     const gray = '#6B7280';
+    const emerald = '#1F9D6D';
 
     // En-tete
     doc
@@ -177,6 +181,17 @@ export function generateDocumentPdf(data: DocumentPdfData): Promise<Buffer> {
       );
       if (data.company.iban) {
         doc.text(`IBAN pour règlement : ${data.company.iban}`, 50, doc.y + 4, { width: 500 });
+      }
+    } else if (data.acceptance) {
+      const dateLabel = data.acceptance.at.toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
+      doc
+        .font('Helvetica-Bold')
+        .fillColor(emerald)
+        .text(`✓ Devis accepté électroniquement par ${data.acceptance.name}, le ${dateLabel}.`, 50, footerY, {
+          width: 500,
+        });
+      if (data.acceptance.ip) {
+        doc.font('Helvetica').fillColor(gray).fontSize(7.5).text(`Adresse IP : ${data.acceptance.ip}`, 50, doc.y + 2, { width: 500 });
       }
     } else {
       doc.text("Devis valable sous réserve d'acceptation écrite du client dans le délai indiqué ci-dessus.", 50, footerY, {

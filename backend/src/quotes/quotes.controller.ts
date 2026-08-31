@@ -65,6 +65,10 @@ export class QuotesController {
       client: quote.client,
       items: quote.items,
       notes: quote.notes,
+      acceptance:
+        quote.status === 'accepte' && quote.acceptedByName && quote.acceptedAt
+          ? { name: quote.acceptedByName, at: quote.acceptedAt, ip: quote.acceptedIp ?? undefined }
+          : undefined,
     });
     res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename=${quote.number}.pdf` });
     res.send(buffer);
@@ -97,6 +101,12 @@ export class QuotesController {
       client: quote.client,
       items: quote.items,
       notes: quote.notes,
+      // No IP on the public copy -- the client doesn't need their own
+      // address echoed back on a document that could end up shared.
+      acceptance:
+        quote.status === 'accepte' && quote.acceptedByName && quote.acceptedAt
+          ? { name: quote.acceptedByName, at: quote.acceptedAt }
+          : undefined,
     });
     res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename=${quote.number}.pdf` });
     res.send(buffer);
