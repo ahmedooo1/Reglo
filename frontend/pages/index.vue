@@ -1,11 +1,4 @@
 <script setup lang="ts">
-const lifecycle = [
-  { status: 'Brouillon', color: 'muted', title: 'Tu crées le devis', text: 'Lignes, TVA multi-taux, totaux calculés automatiquement.' },
-  { status: 'Envoyé', color: 'amber', title: 'Ton client le reçoit', text: 'Un lien public, sans compte à créer de son côté.' },
-  { status: 'Accepté', color: 'indigo', title: 'Il accepte en ligne', text: 'Signature électronique du devis, converti en facture en un clic.' },
-  { status: 'Payé', color: 'emerald', title: 'Tu encaisses', text: 'Paiement Stripe intégré à la facture, retards détectés automatiquement.' },
-]
-
 const montantHT = ref(1200)
 const tauxTVA = ref(20)
 const montantTVA = computed(() => (montantHT.value * tauxTVA.value) / 100)
@@ -28,69 +21,29 @@ const metiers = [
 <template>
   <main class="overflow-x-clip">
     <!-- HERO -->
-    <section class="mx-auto grid max-w-6xl gap-16 px-6 pb-20 pt-16 md:grid-cols-2 md:items-center md:pt-24">
-      <div class="min-w-0" v-reveal>
-        <div class="mb-6 flex items-center gap-3">
-          <span class="seal flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-indigo/50 text-center font-mono text-[9px] font-bold uppercase leading-tight text-indigo">
-            100%<br />Conforme
-          </span>
-          <span class="font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-            Devis &amp; factures<br />pour artisans &amp; indépendants
-          </span>
-        </div>
+    <section class="mx-auto max-w-3xl px-6 pb-10 pt-16 md:pt-24">
+      <div v-reveal>
         <h1 class="font-display text-5xl font-bold leading-[1.05] text-ink md:text-6xl">
-          Des devis et factures qui se font <span class="text-indigo underline decoration-solid decoration-4 underline-offset-8 decoration-indigo/30">payer</span>
+          Des devis et factures qui se font payer
         </h1>
-        <p class="mt-6 font-body text-lg leading-relaxed text-muted">
+        <p class="mt-6 max-w-lg font-body text-lg leading-relaxed text-muted">
           Crée un devis en 2 minutes, envoie-le par lien, convertis-le en facture et encaisse en ligne. Sans tableur, sans oubli de TVA.
         </p>
-        <div class="mt-8 flex flex-col gap-4 sm:flex-row">
-          <NuxtLink to="/register" class="rounded-lg bg-indigo px-7 py-3.5 text-center font-display font-semibold text-white shadow-sm transition hover:bg-indigo-dark">
+        <div class="mt-8">
+          <NuxtLink to="/register" class="inline-block rounded-lg bg-indigo px-7 py-3.5 text-center font-display font-semibold text-white shadow-sm transition hover:bg-indigo-dark">
             Essayer gratuitement
           </NuxtLink>
-          <NuxtLink to="/login" class="rounded-lg border border-line px-7 py-3.5 text-center font-body font-medium text-ink transition hover:bg-white">
-            Se connecter
-          </NuxtLink>
         </div>
-        <div class="mt-10 flex items-center gap-6 font-mono text-[11px] uppercase tracking-[0.14em] text-muted">
-          <span>Gratuit pour commencer</span>
-          <span class="h-1 w-1 rounded-full bg-line" />
-          <span>Sans carte bancaire</span>
-        </div>
-      </div>
-
-      <div v-reveal="120">
-        <InvoiceMockup />
+        <p class="mt-9 flex items-center gap-2 font-mono text-xs text-muted">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="animate-bounce"><path d="M12 4v16M6 14l6 6 6-6" /></svg>
+          Un seul document, tout son cycle de vie
+        </p>
       </div>
     </section>
 
-    <!-- CYCLE DE VIE -->
-    <section class="mx-auto max-w-6xl px-6 py-20">
-      <h2 class="mb-4 font-display text-3xl font-bold text-ink md:text-4xl" v-reveal>Du devis à l'encaissement</h2>
-      <p class="mb-14 max-w-lg font-body text-muted" v-reveal="60">
-        Le même document suit tout son cycle de vie, sans ressaisie.
-      </p>
-
-      <div class="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-        <div v-for="(step, i) in lifecycle" :key="step.status" v-reveal="i * 90" class="relative">
-          <div class="flex items-center gap-3">
-            <span
-              class="rounded-full px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-wide"
-              :class="{
-                'bg-line text-muted': step.color === 'muted',
-                'bg-amber-light text-amber': step.color === 'amber',
-                'bg-indigo-light text-indigo': step.color === 'indigo',
-                'bg-emerald-light text-emerald': step.color === 'emerald',
-              }"
-            >
-              {{ step.status }}
-            </span>
-            <span v-if="i < lifecycle.length - 1" class="stepper-line hidden flex-1 lg:block" />
-          </div>
-          <h3 class="mt-3 font-display text-lg font-bold text-ink">{{ step.title }}</h3>
-          <p class="mt-1.5 font-body text-sm leading-relaxed text-muted">{{ step.text }}</p>
-        </div>
-      </div>
+    <!-- CYCLE DE VIE : le document lui-meme change d'etat au fil du scroll -->
+    <section class="mx-auto max-w-6xl px-6 py-10" v-reveal>
+      <DocumentJourney />
     </section>
 
     <!-- CALCULATEUR TVA -->
@@ -119,10 +72,10 @@ const metiers = [
                 v-model.number="tauxTVA"
                 class="focus-ring mt-2 w-full rounded-lg border border-line bg-white px-4 py-3 font-mono text-lg text-ink outline-none"
               >
-                <option :value="20">20 % &mdash; taux normal</option>
-                <option :value="10">10 % &mdash; taux intermédiaire</option>
-                <option :value="5.5">5,5 % &mdash; taux réduit</option>
-                <option :value="2.1">2,1 % &mdash; taux particulier</option>
+                <option :value="20">20 %, taux normal</option>
+                <option :value="10">10 %, taux intermédiaire</option>
+                <option :value="5.5">5,5 %, taux réduit</option>
+                <option :value="2.1">2,1 %, taux particulier</option>
               </select>
             </label>
           </div>
