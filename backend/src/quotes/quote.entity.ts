@@ -40,6 +40,22 @@ export class Quote {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  // Lightweight e-signature audit trail, captured when a client accepts via
+  // the public link (see QuotesService.updateStatusByToken) -- gives the
+  // owner something to point to if a client later disputes having agreed,
+  // without building a full qualified e-signature integration.
+  @Column({ type: 'varchar', length: 200, nullable: true })
+  acceptedByName: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  acceptedAt: Date | null;
+
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  acceptedIp: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  acceptedUserAgent: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -10,6 +10,9 @@ interface Quote {
   validUntil?: string
   notes?: string
   createdAt: string
+  acceptedByName?: string
+  acceptedAt?: string
+  acceptedIp?: string
 }
 
 const route = useRoute()
@@ -39,6 +42,10 @@ function totals(items: QuoteItem[]) {
 
 function euros(cents: number) {
   return (cents / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+function formatDateTime(iso: string) {
+  return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 async function load() {
@@ -163,6 +170,13 @@ async function convertToInvoice() {
         </span>
       </div>
       <p v-if="sendError" class="mb-4 font-body text-sm text-rose">{{ sendError }}</p>
+
+      <div v-if="quote.status === 'accepte' && quote.acceptedByName" class="mb-6 rounded-lg border border-emerald/25 bg-emerald-light px-4 py-3 font-body text-sm text-ink">
+        <p class="font-semibold text-emerald">Accepté par {{ quote.acceptedByName }}</p>
+        <p class="mt-0.5 text-xs text-muted">
+          {{ quote.acceptedAt ? formatDateTime(quote.acceptedAt) : '' }}<span v-if="quote.acceptedIp"> · IP {{ quote.acceptedIp }}</span>
+        </p>
+      </div>
 
       <div class="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
         <div class="overflow-x-auto">

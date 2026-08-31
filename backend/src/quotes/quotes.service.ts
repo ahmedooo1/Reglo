@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { nanoid } from 'nanoid';
 import { Quote, QuoteStatus } from './quote.entity';
 import { CreateQuoteDto } from './dto/create-quote.dto';
+import { UpdateQuoteStatusDto } from './dto/update-quote-status.dto';
 import { UsersService } from '../users/users.service';
 import { ClientsService } from '../clients/clients.service';
 import { MailService } from '../mail/mail.service';
@@ -78,9 +79,31 @@ export class QuotesService {
     return this.findOneForOwner(id, ownerId);
   }
 
-  async updateStatusByToken(token: string, status: QuoteStatus) {
+  async updateStatusByToken(token: string, dto: UpdateQuoteStatusDto, ip?: string, userAgent?: string) {
     const quote = await this.findByToken(token);
-    await this.quotesRepo.update(quote.id, { status });
+    // Only a quote actually awaiting a response can be accepted/refused --
+    // without this, the public endpoint would let anyone with the link
+    // jump straight from 'brouillon' to 'accepte', or flip an already
+    // accepted/refused quote back and forth.
+    if (quote.status !== 'envoye') {
+      throw new BadRequestException("Ce devis ne peut plus être accepté ou refusé dans son état actuel.");
+    }
+
+    if (dto.status === 'accepte') {
+      const name = dto.name?.trim();
+      if (!name || dto.consent !== true) {
+        throw new BadRequestException('Merci de renseigner votre nom et de confirmer votre accord avant de continuer.');
+      }
+      await this.quotesRepo.update(quote.id, {
+        status: 'accepte',
+        acceptedByName: name,
+        acceptedAt: new Date(),
+        acceptedIp: ip || null,
+        acceptedUserAgent: userAgent || null,
+      });
+    } else {
+      await this.quotesRepo.update(quote.id, { status: 'refuse' });
+    }
     return this.findByToken(token);
   }
 

@@ -14,6 +14,7 @@ import { Response } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { QuotesService } from './quotes.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
+import { UpdateQuoteStatusDto } from './dto/update-quote-status.dto';
 import { generateDocumentPdf } from '../common/pdf/pdf.util';
 
 @Controller('quotes')
@@ -71,13 +72,17 @@ export class QuotesController {
 
   // Acces public pour le client (lien partage, sans authentification)
   @Get('public/:token')
-  findByToken(@Param('token') token: string) {
-    return this.quotesService.findByToken(token);
+  async findByToken(@Param('token') token: string) {
+    const quote = await this.quotesService.findByToken(token);
+    // acceptedIp/acceptedUserAgent are for the owner's audit trail only --
+    // no reason to echo them back on the public, unauthenticated response.
+    const { acceptedIp, acceptedUserAgent, ...publicQuote } = quote;
+    return publicQuote;
   }
 
   @Patch('public/:token/status')
-  updateStatusByToken(@Param('token') token: string, @Body('status') status: any) {
-    return this.quotesService.updateStatusByToken(token, status);
+  updateStatusByToken(@Param('token') token: string, @Body() dto: UpdateQuoteStatusDto, @Req() req: any) {
+    return this.quotesService.updateStatusByToken(token, dto, req.ip, req.headers['user-agent']);
   }
 
   @Get('public/:token/pdf')
