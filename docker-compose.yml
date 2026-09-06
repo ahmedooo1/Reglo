@@ -47,6 +47,7 @@ services:
     restart: unless-stopped
     environment:
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:3011/api}
+      NUXT_PUBLIC_GOOGLE_CLIENT_ID: ${NUXT_PUBLIC_GOOGLE_CLIENT_ID}
     ports:
       - '127.0.0.1:${FRONTEND_HOST_PORT:-3010}:3010'
     depends_on:
