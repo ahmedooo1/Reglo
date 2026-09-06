@@ -26,9 +26,24 @@ export class UsersService {
     return this.usersRepo.findOne({ where: { id } });
   }
 
-  async create(data: { email: string; passwordHash: string; name?: string }) {
+  findByGoogleId(googleId: string) {
+    return this.usersRepo.findOne({ where: { googleId } });
+  }
+
+  async create(data: {
+    email: string;
+    passwordHash?: string;
+    name?: string;
+    googleId?: string;
+    emailVerified?: boolean;
+  }) {
     const user = this.usersRepo.create({ ...data, email: data.email.trim().toLowerCase() });
     return this.usersRepo.save(user);
+  }
+
+  async linkGoogleId(id: string, googleId: string) {
+    await this.usersRepo.update(id, { googleId, emailVerified: true });
+    return this.findById(id);
   }
 
   async setEmailVerified(id: string) {
@@ -44,6 +59,11 @@ export class UsersService {
   async changePassword(id: string, currentPassword: string, newPassword: string) {
     const user = await this.findById(id);
     if (!user) throw new NotFoundException('Utilisateur introuvable');
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        'Ce compte utilise la connexion Google, aucun mot de passe a definir ici',
+      );
+    }
     const valid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!valid) throw new BadRequestException('Mot de passe actuel incorrect');
     const passwordHash = await bcrypt.hash(newPassword, 10);
@@ -53,8 +73,10 @@ export class UsersService {
   async deleteAccount(id: string, password: string) {
     const user = await this.findById(id);
     if (!user) throw new NotFoundException('Utilisateur introuvable');
-    const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) throw new BadRequestException('Mot de passe incorrect');
+    if (user.passwordHash) {
+      const valid = await bcrypt.compare(password, user.passwordHash);
+      if (!valid) throw new BadRequestException('Mot de passe incorrect');
+    }
     // Clients/quotes/invoices all cascade-delete via their owner FK
     // (onDelete: 'CASCADE'), so this alone removes everything tied to
     // the account -- the RGPD "droit à l'effacement" in one operation.

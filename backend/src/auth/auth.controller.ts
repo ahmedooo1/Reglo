@@ -25,6 +25,12 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Throttle({ default: { limit: 8, ttl: 60000 } })
+  @Post('google')
+  googleLogin(@Body('idToken') idToken: string) {
+    return this.authService.googleLogin(idToken);
+  }
+
   @Post('verify-email')
   verifyEmail(@Body('token') token: string) {
     return this.authService.verifyEmail(token);

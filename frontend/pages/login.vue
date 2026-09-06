@@ -46,6 +46,15 @@ async function resendVerification() {
     resendState.value = 'sent'
   }
 }
+
+function onGoogleSuccess(session: { accessToken: string; user: any }) {
+  auth.setSession(session.accessToken, session.user)
+  router.push((route.query.redirect as string) || '/dashboard')
+}
+
+function onGoogleError(message: string) {
+  errorMsg.value = message
+}
 </script>
 
 <template>
@@ -81,6 +90,15 @@ async function resendVerification() {
         {{ loading ? 'Connexion...' : 'Se connecter' }}
       </button>
     </form>
+
+    <div class="my-6 flex items-center gap-3">
+      <div class="h-px flex-1 bg-line"></div>
+      <span class="text-xs uppercase tracking-wide text-muted">ou</span>
+      <div class="h-px flex-1 bg-line"></div>
+    </div>
+    <div class="flex justify-center">
+      <GoogleSignInButton @success="onGoogleSuccess" @error="onGoogleError" />
+    </div>
 
     <p class="mt-6 text-center font-body text-sm text-muted">
       Pas encore de compte ? <NuxtLink to="/register" class="text-indigo underline">Inscris-toi</NuxtLink>

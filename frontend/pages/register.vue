@@ -34,6 +34,19 @@ async function submit() {
     loading.value = false
   }
 }
+
+function onGoogleSuccess(session: { accessToken: string; user: any }) {
+  auth.setSession(session.accessToken, session.user)
+  router.push('/dashboard')
+}
+
+function blockedGoogleClick() {
+  errorMsg.value = "Merci d'accepter les CGU avant de continuer avec Google."
+}
+
+function onGoogleError(message: string) {
+  errorMsg.value = message
+}
 </script>
 
 <template>
@@ -87,6 +100,23 @@ async function submit() {
           {{ loading ? 'Création...' : 'Créer mon compte' }}
         </button>
       </form>
+
+      <div class="my-6 flex items-center gap-3">
+        <div class="h-px flex-1 bg-line"></div>
+        <span class="text-xs uppercase tracking-wide text-muted">ou</span>
+        <div class="h-px flex-1 bg-line"></div>
+      </div>
+      <div class="flex justify-center">
+        <GoogleSignInButton v-if="acceptedTerms" @success="onGoogleSuccess" @error="onGoogleError" />
+        <button
+          v-else
+          type="button"
+          class="focus-ring rounded-lg border border-line bg-white px-6 py-2.5 font-body text-sm text-muted"
+          @click="blockedGoogleClick"
+        >
+          Continuer avec Google
+        </button>
+      </div>
 
       <p class="mt-6 text-center font-body text-sm text-muted">
         Déjà inscrit ? <NuxtLink to="/login" class="text-indigo underline">Connecte-toi</NuxtLink>

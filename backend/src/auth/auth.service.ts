@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -6,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
 import { RegisterDto } from './dto/register.dto';
@@ -13,6 +15,8 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -47,9 +51,51 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException('Identifiants invalides');
+    if (!user.passwordHash) {
+      throw new UnauthorizedException(
+        'Ce compte utilise la connexion Google, utilise le bouton "Continuer avec Google"',
+      );
+    }
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Identifiants invalides');
     if (!user.emailVerified) throw new ForbiddenException('EMAIL_NOT_VERIFIED');
+    return { accessToken: this.sign(user.id), user: this.toPublic(user) };
+  }
+
+  async googleLogin(idToken: string) {
+    if (!idToken) throw new BadRequestException('Jeton Google manquant');
+
+    let payload: { sub: string; email?: string; email_verified?: boolean; name?: string };
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload() as typeof payload;
+    } catch {
+      throw new UnauthorizedException('Jeton Google invalide');
+    }
+
+    if (!payload?.email || !payload.email_verified) {
+      throw new UnauthorizedException('Email Google non verifie');
+    }
+
+    let user = await this.usersService.findByGoogleId(payload.sub);
+
+    if (!user) {
+      const existingByEmail = await this.usersService.findByEmail(payload.email);
+      if (existingByEmail) {
+        user = await this.usersService.linkGoogleId(existingByEmail.id, payload.sub);
+      } else {
+        user = await this.usersService.create({
+          email: payload.email,
+          googleId: payload.sub,
+          name: payload.name,
+          emailVerified: true,
+        });
+      }
+    }
+
     return { accessToken: this.sign(user.id), user: this.toPublic(user) };
   }
 

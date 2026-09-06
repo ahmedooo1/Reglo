@@ -33,11 +33,13 @@ export default defineNuxtConfig({
         { rel: 'icon', type: 'image/png', href: '/icon.png' },
         { rel: 'apple-touch-icon', href: '/icon.png' },
       ],
+      script: [{ src: 'https://accounts.google.com/gsi/client', async: true, defer: true }],
     },
   },
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3011/api',
+      googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
     },
   },
 })
