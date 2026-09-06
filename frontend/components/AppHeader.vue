@@ -1,6 +1,13 @@
 <script setup lang="ts">
 const auth = useAuthStore()
+const router = useRouter()
 const mobileOpen = ref(false)
+
+function logout() {
+  auth.logout()
+  mobileOpen.value = false
+  router.push('/')
+}
 </script>
 
 <template>
@@ -25,6 +32,9 @@ const mobileOpen = ref(false)
           >
             + Nouveau devis
           </NuxtLink>
+          <button type="button" class="text-sm text-muted transition hover:text-ink" @click="logout">
+            Déconnexion
+          </button>
         </template>
         <template v-else>
           <NuxtLink to="/login" class="text-sm text-muted transition hover:text-ink">Connexion</NuxtLink>
@@ -50,6 +60,7 @@ const mobileOpen = ref(false)
           <NuxtLink to="/dashboard" @click="mobileOpen = false">Tableau de bord</NuxtLink>
           <NuxtLink to="/clients" @click="mobileOpen = false">Clients</NuxtLink>
           <NuxtLink to="/settings" @click="mobileOpen = false">Réglages</NuxtLink>
+          <button type="button" class="text-left" @click="logout">Déconnexion</button>
         </template>
         <template v-else>
           <NuxtLink to="/login" @click="mobileOpen = false">Connexion</NuxtLink>
