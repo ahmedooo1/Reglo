@@ -42,8 +42,11 @@ export class UsersService {
   }
 
   async linkGoogleId(id: string, googleId: string) {
-    await this.usersRepo.update(id, { googleId, emailVerified: true });
-    return this.findById(id);
+    const user = await this.findById(id);
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
+    user.googleId = googleId;
+    user.emailVerified = true;
+    return this.usersRepo.save(user);
   }
 
   async setEmailVerified(id: string) {
