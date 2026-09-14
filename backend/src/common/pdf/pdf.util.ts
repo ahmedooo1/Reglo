@@ -25,7 +25,7 @@ export interface DocumentPdfData {
   notes?: string;
   // Devis only -- when set, replaces the generic "sous reserve
   // d'acceptation ecrite" footer with the actual e-signature proof.
-  acceptance?: { name: string; at: Date; ip?: string };
+  acceptance?: { name: string; at: Date; ip?: string; signature?: string };
 }
 
 function formatEur(cents: number) {
@@ -191,11 +191,27 @@ export function generateDocumentPdf(data: DocumentPdfData): Promise<Buffer> {
       }
     } else if (data.acceptance) {
       const dateLabel = data.acceptance.at.toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
+      const hasSignature = Boolean(data.acceptance.signature);
+      if (hasSignature) {
+        try {
+          const base64 = data.acceptance.signature!.replace(/^data:image\/png;base64,/, '');
+          const imgBuffer = Buffer.from(base64, 'base64');
+          doc.image(imgBuffer, 400, footerY - 68, { fit: [150, 55] });
+          doc
+            .font('Helvetica')
+            .fontSize(7)
+            .fillColor(gray)
+            .text('Signature du client', 400, footerY - 10, { width: 150 });
+        } catch {
+          // Corrupted/undecodable signature data -- fall back to the
+          // typed-name proof below rather than failing the whole PDF.
+        }
+      }
       doc
         .font('Helvetica-Bold')
         .fillColor(emerald)
         .text(`✓ Devis accepté électroniquement par ${data.acceptance.name}, le ${dateLabel}.`, 50, footerY, {
-          width: 500,
+          width: hasSignature ? 340 : 500,
         });
       if (data.acceptance.ip) {
         doc.font('Helvetica').fillColor(gray).fontSize(7.5).text(`Adresse IP : ${data.acceptance.ip}`, 50, doc.y + 2, { width: 500 });

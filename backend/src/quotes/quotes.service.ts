@@ -100,6 +100,7 @@ export class QuotesService {
         acceptedAt: new Date(),
         acceptedIp: ip || null,
         acceptedUserAgent: userAgent || null,
+        acceptedSignature: dto.signature || null,
       });
     } else {
       await this.quotesRepo.update(quote.id, { status: 'refuse' });

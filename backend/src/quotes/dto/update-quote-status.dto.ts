@@ -1,4 +1,4 @@
-import { IsBoolean, IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsIn, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 export class UpdateQuoteStatusDto {
   @IsIn(['accepte', 'refuse'])
@@ -14,4 +14,13 @@ export class UpdateQuoteStatusDto {
   @IsOptional()
   @IsBoolean()
   consent?: boolean;
+
+  // Optional drawn (finger/mouse) signature, as a PNG data URL from the
+  // frontend's canvas signature pad. Length cap keeps a rogue client from
+  // posting an oversized payload; a canvas signature is a few KB.
+  @IsOptional()
+  @IsString()
+  @MaxLength(300000)
+  @Matches(/^data:image\/png;base64,[A-Za-z0-9+/]+=*$/, { message: 'Signature invalide.' })
+  signature?: string;
 }

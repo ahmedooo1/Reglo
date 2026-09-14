@@ -67,7 +67,12 @@ export class QuotesController {
       notes: quote.notes,
       acceptance:
         quote.status === 'accepte' && quote.acceptedByName && quote.acceptedAt
-          ? { name: quote.acceptedByName, at: quote.acceptedAt, ip: quote.acceptedIp ?? undefined }
+          ? {
+              name: quote.acceptedByName,
+              at: quote.acceptedAt,
+              ip: quote.acceptedIp ?? undefined,
+              signature: quote.acceptedSignature ?? undefined,
+            }
           : undefined,
     });
     res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename=${quote.number}.pdf` });
@@ -105,7 +110,7 @@ export class QuotesController {
       // address echoed back on a document that could end up shared.
       acceptance:
         quote.status === 'accepte' && quote.acceptedByName && quote.acceptedAt
-          ? { name: quote.acceptedByName, at: quote.acceptedAt }
+          ? { name: quote.acceptedByName, at: quote.acceptedAt, signature: quote.acceptedSignature ?? undefined }
           : undefined,
     });
     res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename=${quote.number}.pdf` });

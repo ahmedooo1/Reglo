@@ -56,6 +56,11 @@ export class Quote {
   @Column({ type: 'text', nullable: true })
   acceptedUserAgent: string | null;
 
+  // Base64 PNG data URL of the client's drawn (finger/mouse) signature,
+  // captured alongside the typed name above and embedded in the PDF.
+  @Column({ type: 'text', nullable: true })
+  acceptedSignature: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

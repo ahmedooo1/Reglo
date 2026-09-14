@@ -22,8 +22,12 @@ const acceptName = ref('')
 const acceptConsent = ref(false)
 const acceptError = ref('')
 const acceptedAsName = ref('')
+const signatureDataUrl = ref<string | null>(null)
+const acceptedSignatureUrl = ref<string | null>(null)
 
-const canAccept = computed(() => acceptName.value.trim().length > 0 && acceptConsent.value)
+const canAccept = computed(
+  () => acceptName.value.trim().length > 0 && acceptConsent.value && Boolean(signatureDataUrl.value),
+)
 
 function totals(items: QuoteItem[]) {
   let subtotal = 0
@@ -57,10 +61,14 @@ async function respond(status: 'accepte' | 'refuse') {
     if (status === 'accepte') {
       body.name = acceptName.value.trim()
       body.consent = acceptConsent.value
+      body.signature = signatureDataUrl.value
     }
     await request(`/quotes/public/${route.params.token}/status`, { method: 'PATCH', body })
     if (quote.value) quote.value.status = status
-    if (status === 'accepte') acceptedAsName.value = acceptName.value.trim()
+    if (status === 'accepte') {
+      acceptedAsName.value = acceptName.value.trim()
+      acceptedSignatureUrl.value = signatureDataUrl.value
+    }
     responded.value = true
   } catch (e: any) {
     acceptError.value = e?.data?.message || "Une erreur est survenue, merci de réessayer."
@@ -120,6 +128,12 @@ function downloadPdf() {
           <input v-model="acceptConsent" type="checkbox" class="focus-ring mt-0.5 h-4 w-4 rounded border-line" />
           <span>J'ai pris connaissance de ce devis et j'en accepte les termes.</span>
         </label>
+        <div class="mt-4">
+          <span class="font-body text-xs font-medium uppercase tracking-wide text-muted">Votre signature</span>
+          <div class="mt-2 max-w-sm">
+            <SignaturePad @change="(v) => (signatureDataUrl = v)" />
+          </div>
+        </div>
         <p v-if="acceptError" class="mt-3 font-body text-sm text-rose">{{ acceptError }}</p>
         <div class="mt-4 flex flex-wrap gap-3">
           <button :disabled="responding || !canAccept" class="rounded-lg bg-emerald px-5 py-2.5 font-body text-sm font-semibold text-white disabled:opacity-60" @click="respond('accepte')">
@@ -132,9 +146,17 @@ function downloadPdf() {
       </div>
 
       <div class="mt-8 flex flex-wrap items-center gap-3">
-        <p v-if="quote.status === 'accepte'" class="font-body text-sm font-medium text-emerald">
-          Devis accepté{{ acceptedAsName ? ` par ${acceptedAsName}` : '' }}, merci !
-        </p>
+        <div v-if="quote.status === 'accepte'">
+          <p class="font-body text-sm font-medium text-emerald">
+            Devis accepté{{ acceptedAsName ? ` par ${acceptedAsName}` : '' }}, merci !
+          </p>
+          <img
+            v-if="acceptedSignatureUrl"
+            :src="acceptedSignatureUrl"
+            alt="Signature"
+            class="mt-2 h-16 rounded-md border border-line bg-white"
+          />
+        </div>
         <p v-else-if="quote.status === 'refuse'" class="font-body text-sm font-medium text-muted">Devis refusé.</p>
         <button class="rounded-lg border border-line px-5 py-2.5 font-body text-sm font-medium text-ink" @click="downloadPdf">
           Télécharger le PDF
